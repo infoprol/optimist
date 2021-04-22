@@ -15,11 +15,21 @@ defmodule Optimist.Endpoint do
     send_resp(conn, 200, "pong!")
   end
 
+  get "/v1/things" do
+    #Plug.Conn.fetch_path_params(conn)
+    case conn.path_params do
+      %{"id" => thing_id} ->
+        %{"thing_id" => thing_id}
+      other ->
+        %{"something_else" => other}
+    end
+    |> Poison.encode!()
+    |> (fn x -> send_resp(conn, 200, x) end).()
+  end
+
   match _ do
     send_resp(conn, 404, "oh no, not again...")
   end
-
-
 
 
 
