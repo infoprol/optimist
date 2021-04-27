@@ -8,7 +8,7 @@ defmodule Optimist.Endpoint do
 
   plug(Plug.Logger)
   plug(:match)  # match the routed path
-  plug(Plug.Parsers, parsers: [:json], json_decoder: Poison)
+  #plug(Plug.Parsers, parsers: [:json], json_decoder: Poison)
   plug(:dispatch)  # return conn from plug pipeline
 
   get "/ping" do
@@ -21,20 +21,25 @@ defmodule Optimist.Endpoint do
 
 
   get "/things/:thing_id" do
-    things_pid()
-    |> looksee("pid_get_got")
-    |> FakeDb.Things.fetch(thing_id)
+    #things_pid()
+    #|> looksee("pid_get_got")
+    thing_id
+    |> looksee("thing_id in endpoint.get")
+    |> FakeDb.Things.fetch()
+    |> looksee("result of fetch returned to endpoint.get")
     |> Poison.encode!()
+    |> looksee("endpoint encoded by Poison")
     |> (fn x -> send_resp(conn, 200, x) end).()
   end
 
   put "/things/:thing_id" do
-    #Plug.Conn.fetch_params(conn)
+    {:ok, body, conn}= Plug.Conn.read_body(conn)
+    body |> looksee("body")
     looksee(conn, "conn")
-    things_pid()
+    thing_id
+    |> looksee("thing_id in endpoint.put")
     |> FakeDb.Things.put(
-        thing_id,
-        conn.body_params
+        body |> Poison.decode!()
         #conn.body_params |> Poison.decode!()
       )
 

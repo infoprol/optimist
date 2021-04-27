@@ -11,15 +11,18 @@ defmodule FakeDb.Things do
     {:ok, pid}
   end
 
-  def fetch(pid, key) do
-    IO.inspect(%{"things.get.args" => [pid, key]})
-    Agent.get(__MODULE__, &Map.get(&1, key))
+  def fetch(key) do
+    IO.inspect(%{"things.get.args" => [key]})
+    case Agent.get(__MODULE__, &Map.get(&1, key)) do
+      {:ok, thing} -> thing
+      unexpected -> %{"unexpected" => unexpected}
+    end
     |> (fn x ->
         IO.inspect(x)
         x end).()
   end
 
-  def put(pid, key, val) do
+  def put(key, val) do
     Agent.update(__MODULE__, &Map.put(&1, key, val))
   end
 
