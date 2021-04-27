@@ -25,3 +25,5 @@ optimist-*.tar
 
 # Temporary files for e.g. tests
 /tmp
+.metals/
+.vscode

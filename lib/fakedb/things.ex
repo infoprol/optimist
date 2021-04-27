@@ -1,13 +1,37 @@
 defmodule FakeDb.Things do
+  use Agent
+
   def start_link(arg) do
     IO.puts("FakeDb.Things.start_link started!")
     IO.inspect(%{ "start_link_args" => arg })
 
-    {:ok, pid} = Process.spawn(__MODULE__.loop, [])
-    IO.puts("pid of fakeness => " <> to_string(pid))
+    {:ok, pid} = Agent.start_link(fn -> %{} end, name: __MODULE__)
+    #IO.puts("pid of fakeness => #{(pid)}")
     IO.inspect(%{"fdb.pid" => pid})
     {:ok, pid}
   end
+
+  def fetch(pid, key) do
+    IO.inspect(%{"things.get.args" => [pid, key]})
+    Agent.get(__MODULE__, &Map.get(&1, key))
+    |> (fn x ->
+        IO.inspect(x)
+        x end).()
+  end
+
+  def put(pid, key, val) do
+    Agent.update(__MODULE__, &Map.put(&1, key, val))
+  end
+
+
+
+
+
+
+
+
+
+
 
   def loop(acc \\ 0) do
     IO.inspect(%{"acc" => acc})
@@ -27,14 +51,13 @@ defmodule FakeDb.Things do
   end
 
 
-
-  def child_spec(opts) do
-    %{
-      id: __MODULE__,
-      start: {__MODULE__, :start_link, [opts]},
-      type: :worker,
-      restart: :permanent,
-      shutdown: 666
-    }
-  end
+#  def child_spec(opts) do
+#    %{
+#      id: __MODULE__,
+#      start: {__MODULE__, :start_link, [opts]},
+#      type: :worker,
+#      restart: :permanent,
+#      shutdown: 666
+#    }
+# end
 end

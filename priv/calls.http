@@ -1,0 +1,16 @@
+
+
+### put thing ###
+PUT http://localhost:1337/things/42
+
+{
+    "iam": ["a", "thing"],
+    "myid": 42.0,
+    "nested": {
+        "x": 43,
+        "y": [4, 4]
+    }
+}
+
+### get thing ###
+GET http://localhost:1337/things/42
