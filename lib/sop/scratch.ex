@@ -43,6 +43,10 @@ defmodule SoP.Scratch do
     quote do (((a + 7) * (41 + 1)) + x) * ((x + y) * (m + n))
     end
   end
+
+  def xx() do
+    quote do ((p + 7) * (q + 6)) end
+  end
 end
 
 defmodule SoP.Var do
@@ -130,6 +134,45 @@ defmodule SoP do
   def bubble_plus(%P{factors: [p, q]}), do: %P{factors: [ bubble_plus(p), bubble_plus(q) ]}
   def bubble_plus(%S{terms: [m, n]}), do: %S{terms: [ bubble_plus(n), bubble_plus(m) ]}
   def bubble_plus(elem) when is_struct(elem) and elem.__struct__ in [N,V], do: elem
+
+
+  def is_product?(%P{}), do: true
+  def is_product?(_), do: false
+  def is_sum?(%S{}), do: true
+  def is_sum?(_), do: false
+
+  def rollup(x=%V{}), do: %P{factors: [x]}
+  def rollup(x=%N{}), do: %P{factors: [x]}
+  def rollup(p=%P{}) do
+    with rolled_up <- p |> Map.get(:factors) |> Enum.map(&rollup/1),
+      true <- rolled_up |> Enum.reduce(fn x,acc -> is_product?(x) && acc end),
+      ff <- rolled_up |> Enum.flat_map(&(&1)) do
+        %P{factors: ff}
+    else
+      _ -> p
+    end
+  end
+
+  def rollup(x), do: x
+
+
+  #def rollup(%P{factors: [ %P{factors: [p, q]} | tail ]}), do:
+  #  %P{factors: [ rollup(m), rollup(p), rollup(q) ]}
+
+
+  #def rollup(%P{factors: [ %P{factors: [p, q]}, n ]}), do:
+  #  %P{factors: [ rollup(p), rollup(q), rollup(n) ]}
+
+  #  %P{factors: Enum.reduce([q,p,m], [], fn (x,acc) -> rollup(x).factors ++ acc end)}
+  #def rollup(%P{factors: [ %P{factors: [p, q]}, n  ]}), do:
+  #  %P{factors: Enum.reduce([n,q,p], [], fn (x,acc) -> rollup(x).factors ++ acc end)}
+
+  #def rollup(%S{terms: [ m, %S{terms: [p, q]} ]}), do:
+  #  %S{terms: Enum.reduce([q,p,m], [], fn (x, acc) -> rollup(x).factors ++ acc end)}
+
+  #def rollup(%S{terms: [ %S{terms: [p, q]}, m ]}), do:
+  #  %S{terms: Enum.reduce([q,p,m], [], fn (x, acc) -> rollup(x).factors ++ acc end)}
+
 
 
 
